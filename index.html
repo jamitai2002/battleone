@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Battleship</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Battleship</h1>
+    <p class="tagline">Sink the computer's fleet before it sinks yours.</p>
+  </header>
+
+  <main>
+    <!-- Setup phase -->
+    <section id="setup" class="panel">
+      <h2>Place Your Fleet</h2>
+      <div class="setup-controls">
+        <button id="orientation-btn" type="button">Orientation: Horizontal</button>
+        <button id="random-btn" type="button">Randomize</button>
+        <button id="reset-placement-btn" type="button">Clear</button>
+        <button id="start-btn" type="button" disabled>Start Game</button>
+      </div>
+      <div class="ship-tray" id="ship-tray"></div>
+      <div class="board-wrap">
+        <div class="board-label">Your Waters</div>
+        <div id="setup-board" class="board" aria-label="Your placement board"></div>
+      </div>
+      <p class="hint">Click a ship in the tray, then click your board to place it. Use “Orientation” to rotate.</p>
+    </section>
+
+    <!-- Battle phase -->
+    <section id="battle" class="panel hidden">
+      <div class="status-bar">
+        <div id="message" class="message">Your turn — fire at the enemy waters!</div>
+        <div class="scoreboard">
+          <span id="player-score">Enemy ships left: 5</span>
+          <span id="enemy-score">Your ships left: 5</span>
+        </div>
+      </div>
+      <div class="boards">
+        <div class="board-wrap">
+          <div class="board-label">Enemy Waters (click to fire)</div>
+          <div id="enemy-board" class="board enemy"></div>
+        </div>
+        <div class="board-wrap">
+          <div class="board-label">Your Waters</div>
+          <div id="player-board" class="board"></div>
+        </div>
+      </div>
+      <button id="play-again-btn" type="button" class="hidden">Play Again</button>
+    </section>
+  </main>
+
+  <footer>
+    <p>Built with vanilla HTML/CSS/JS. <a href="BUGS.md">Bug report</a></p>
+  </footer>
+
+  <script src="game.js"></script>
+</body>
+</html>
