@@ -19,7 +19,10 @@ check("shipCells off bottom edge -> null", T.shipCells(7, 0, 5, "V") === null);
 const ships = [];
 check("place first ship ok", T.placeShip(g, ships, { name: "A", size: 3 }, 0, 0, "H"));
 check("overlap rejected", !T.placeShip(g, ships, { name: "B", size: 3 }, 0, 0, "V"));
-check("adjacent placement allowed", T.placeShip(g, ships, { name: "C", size: 2 }, 1, 0, "H"));
+// Buffer rule: ships may not touch, including diagonally.
+check("orthogonally adjacent placement rejected", !T.placeShip(g, ships, { name: "C", size: 2 }, 1, 0, "H"));
+check("diagonally adjacent placement rejected", !T.placeShip(g, ships, { name: "D", size: 2 }, 1, 3, "H"));
+check("placement with 1-square gap allowed", T.placeShip(g, ships, { name: "E", size: 2 }, 2, 0, "H"));
 
 /* 3. Randomize produces full, non-overlapping fleet */
 const rg = T.makeGrid();
@@ -29,6 +32,27 @@ check("randomize places all 5 ships", rships.length === 5);
 const occupied = rg.flat().filter((v) => v === T.SHIP).length;
 const expected = T.SHIPS.reduce((s, d) => s + d.size, 0);
 check("randomize occupies exactly sum(sizes) cells (no overlap)", occupied === expected);
+
+// Buffer integrity: no cell of one ship may be 8-adjacent to a different ship.
+function buffersRespected(ships) {
+  for (let i = 0; i < ships.length; i++) {
+    for (let j = i + 1; j < ships.length; j++) {
+      for (const a of ships[i].cells) {
+        for (const b of ships[j].cells) {
+          if (Math.abs(a.r - b.r) <= 1 && Math.abs(a.c - b.c) <= 1) return false;
+        }
+      }
+    }
+  }
+  return true;
+}
+let buffersOk = true;
+for (let i = 0; i < 200; i++) {
+  const tg = T.makeGrid(); const ts = [];
+  T.randomizeFleet(tg, ts);
+  if (ts.length !== 5 || !buffersRespected(ts)) { buffersOk = false; break; }
+}
+check("randomize never lets ships touch (200 fleets, incl. diagonal)", buffersOk);
 
 /* 4. applyShot results */
 const sg = T.makeGrid();
@@ -111,6 +135,35 @@ check("place ship A once", T.placeShip(T.state.playerBoard, T.state.playerShips,
 const before = T.state.playerShips.length;
 T.placeShip(T.state.playerBoard, T.state.playerShips, def0, 0, 0, "H"); // overlap -> rejected
 check("overlapping re-place rejected (count unchanged)", T.state.playerShips.length === before);
+
+/* 9. Turn rules: keep firing on hit/sunk, lose turn only on a miss */
+T.state = T.createState();
+T.state.phase = "battle";
+T.placeShip(T.state.enemyBoard, T.state.enemyShips, { name: "E", size: 3 }, 0, 0, "H");
+T.placeShip(T.state.playerBoard, T.state.playerShips, { name: "P", size: 2 }, 9, 0, "H");
+T.state.playerTurn = true;
+T.state.locked = false;
+T.handlePlayerShot(0, 0); // hit (ship not sunk)
+check("player keeps turn after a hit", T.state.playerTurn === true && T.state.locked === false);
+T.handlePlayerShot(5, 5); // miss
+check("player loses turn after a miss", T.state.playerTurn === false && T.state.locked === true);
+
+// AI keeps firing on a hit, yields on a miss.
+T.state = T.createState();
+T.state.phase = "battle";
+T.placeShip(T.state.enemyBoard, T.state.enemyShips, { name: "E", size: 2 }, 9, 0, "H");
+T.placeShip(T.state.playerBoard, T.state.playerShips, { name: "P", size: 3 }, 0, 0, "H");
+T.state.playerTurn = false;
+T.state.locked = true;
+// Force the AI to fire at a known player-ship cell (a hit).
+T.state.ai.targets = [{ r: 0, c: 0 }];
+T.aiTurn();
+check("AI keeps turn after a hit (still player-locked)",
+  T.state.playerTurn === false && T.state.locked === true);
+// Force the AI to fire at empty water (a miss).
+T.state.ai.targets = [{ r: 5, c: 5 }];
+T.aiTurn();
+check("AI yields turn after a miss", T.state.playerTurn === true && T.state.locked === false);
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

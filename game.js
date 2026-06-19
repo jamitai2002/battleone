@@ -84,10 +84,21 @@ function shipCells(r, c, size, orientation) {
   return cells;
 }
 
-// Can a ship occupy these cells on the given grid? (no overlap)
+// Can a ship occupy these cells? Requires the cells to be empty AND a one-square
+// buffer (including diagonals) free of any other ship — ships may not touch.
 function canPlace(grid, cells) {
   if (!cells) return false;
-  return cells.every(({ r, c }) => grid[r][c] === EMPTY);
+  return cells.every(({ r, c }) => {
+    if (grid[r][c] !== EMPTY) return false;
+    for (let dr = -1; dr <= 1; dr++) {
+      for (let dc = -1; dc <= 1; dc++) {
+        const rr = r + dr;
+        const cc = c + dc;
+        if (inBounds(rr, cc) && grid[rr][cc] === SHIP) return false;
+      }
+    }
+    return true;
+  });
 }
 
 /* ------------------------------------------------------------------ *
@@ -354,9 +365,9 @@ function handlePlayerShot(r, c) {
 
   if (result === "sunk") {
     const ship = findShipAt(state.enemyShips, r, c);
-    setMessage(`Direct hit! You sank the enemy ${ship.name}!`);
+    setMessage(`Direct hit! You sank the enemy ${ship.name}! Fire again.`);
   } else if (result === "hit") {
-    setMessage("Hit!");
+    setMessage("Hit! Fire again.");
   } else {
     setMessage("Miss.");
   }
@@ -366,10 +377,12 @@ function handlePlayerShot(r, c) {
     return;
   }
 
-  // Hand turn to AI.
-  state.playerTurn = false;
-  state.locked = true;
-  setTimeout(aiTurn, 650);
+  // A hit (or sink) earns another shot; only a miss ends the player's turn.
+  if (result === "miss") {
+    state.playerTurn = false;
+    state.locked = true;
+    setTimeout(aiTurn, 650);
+  }
 }
 
 /* ------------------------------------------------------------------ *
@@ -393,8 +406,7 @@ function aiTurn() {
     state.ai.hits.push({ r, c });
     if (result === "sunk") {
       const ship = findShipAt(state.playerShips, r, c);
-      // Remove only THIS ship's cells from the hit run. Ships are allowed to
-      // touch, so the run may still contain live hits on a neighbouring ship.
+      // Drop the sunk ship's cells from the hit run and start hunting fresh.
       state.ai.hits = state.ai.hits.filter(
         (h) => !ship.cells.some((cell) => cell.r === h.r && cell.c === h.c)
       );
@@ -418,8 +430,13 @@ function aiTurn() {
     return;
   }
 
-  state.playerTurn = true;
-  state.locked = false;
+  // A hit (or sink) earns the AI another shot; only a miss returns the turn.
+  if (result === "miss") {
+    state.playerTurn = true;
+    state.locked = false;
+  } else {
+    setTimeout(aiTurn, 650);
+  }
 }
 
 function chooseAIShot() {
