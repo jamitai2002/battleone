@@ -94,9 +94,9 @@ const epilogue = `
 this.__test = {
   get state(){ return state; },
   set state(v){ state = v; },
-  SHIPS, BOARD_SIZE, EMPTY, SHIP, MISS, HIT,
+  SHIPS, BOARD_SIZE, EMPTY, SHIP, MISS, HIT, BLOCKED,
   makeGrid, shipCells, canPlace, placeShip, randomizeFleet,
-  applyShot, shipsRemaining, findShipAt,
+  applyShot, blockAroundShip, shipsRemaining, findShipAt,
   startGame, handlePlayerShot, aiTurn, chooseAIShot, queueAdjacentTargets,
   createState, isFireable,
 };`;

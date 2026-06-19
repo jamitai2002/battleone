@@ -64,6 +64,28 @@ check("repeat shot detected", T.applyShot(sg, sships, 5, 5) === "repeat");
 check("final shot = sunk", T.applyShot(sg, sships, 5, 6) === "sunk");
 check("shipsRemaining drops to 0", T.shipsRemaining(sships) === 0);
 
+/* 4b. Sinking a ship blocks its surrounding ring */
+// Destroyer occupies (5,5)-(5,6). Its 8-neighbour ring should now be BLOCKED.
+const ring = [
+  [4, 4], [4, 5], [4, 6], [4, 7],
+  [5, 4], [5, 7],
+  [6, 4], [6, 5], [6, 6], [6, 7],
+];
+check("sunk ship blocks its full surrounding ring",
+  ring.every(([r, c]) => sg[r][c] === T.BLOCKED));
+check("ship cells themselves are HIT not BLOCKED",
+  sg[5][5] === T.HIT && sg[5][6] === T.HIT);
+check("blocked cells are not fireable", !T.isFireable(sg, 4, 5));
+check("firing a blocked cell returns repeat", T.applyShot(sg, sships, 4, 5) === "repeat");
+// A pre-existing miss next to the ship is preserved (not overwritten by BLOCKED).
+const mg = T.makeGrid();
+const mships = [];
+T.placeShip(mg, mships, { name: "Destroyer", size: 2 }, 5, 5, "H");
+T.applyShot(mg, mships, 4, 5); // miss adjacent to ship
+T.applyShot(mg, mships, 5, 5);
+T.applyShot(mg, mships, 5, 6); // sink
+check("existing miss adjacent to a sunk ship stays a miss", mg[4][5] === T.MISS);
+
 /* 5. Full battle sim: player auto-fires whole board, should win */
 T.state = T.createState();
 // give player a valid fleet so startGame proceeds

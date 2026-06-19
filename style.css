@@ -7,6 +7,7 @@
   --hit: #e63946;
   --miss: #cdd6dd;
   --sunk: #6a040f;
+  --blocked: #0a0a0a;
   --ship: #415a77;
   --ship-preview: #8da9c4;
   --accent: #ffb703;
@@ -159,6 +160,7 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .cell.hit { background: var(--hit); }
 .cell.miss { background: var(--miss); }
 .cell.sunk { background: var(--sunk); }
+.cell.blocked { background: var(--blocked); }
 
 .status-bar {
   display: flex;

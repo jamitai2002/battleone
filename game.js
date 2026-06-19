@@ -20,6 +20,9 @@ const EMPTY = 0;
 const SHIP = 1;
 const MISS = 2;
 const HIT = 3;
+// Auto-revealed buffer cell around a sunk ship — guaranteed empty, so it is
+// locked out for both players (no one can fire there).
+const BLOCKED = 4;
 
 /* ------------------------------------------------------------------ *
  * Game state
@@ -168,6 +171,7 @@ function renderOwnBoard(container, grid, ships) {
       if (v === SHIP) cell.classList.add("ship");
       else if (v === MISS) cell.classList.add("miss");
       else if (v === HIT) cell.classList.add("hit");
+      else if (v === BLOCKED) cell.classList.add("blocked");
     }
   }
   markSunk(container, ships);
@@ -185,6 +189,9 @@ function renderEnemyBoard(container, grid, ships) {
         cell.classList.add("fired");
       } else if (v === HIT) {
         cell.classList.add("hit");
+        cell.classList.add("fired");
+      } else if (v === BLOCKED) {
+        cell.classList.add("blocked");
         cell.classList.add("fired");
       }
       // EMPTY and (unhit) SHIP both render as plain water.
@@ -329,15 +336,35 @@ function findShipAt(ships, r, c) {
 // Apply a shot to a grid/ship list. Returns "miss" | "hit" | "sunk" | "repeat".
 function applyShot(grid, ships, r, c) {
   const v = grid[r][c];
-  if (v === MISS || v === HIT) return "repeat";
+  if (v === MISS || v === HIT || v === BLOCKED) return "repeat";
   if (v === SHIP) {
     grid[r][c] = HIT;
     const ship = findShipAt(ships, r, c);
     ship.hits++;
-    return ship.hits >= ship.size ? "sunk" : "hit";
+    if (ship.hits >= ship.size) {
+      blockAroundShip(grid, ship);
+      return "sunk";
+    }
+    return "hit";
   }
   grid[r][c] = MISS;
   return "miss";
+}
+
+// Once a ship is sunk, reveal its surrounding ring (guaranteed empty by the
+// no-touching placement rule) as BLOCKED so neither side wastes a shot there.
+function blockAroundShip(grid, ship) {
+  for (const { r, c } of ship.cells) {
+    for (let dr = -1; dr <= 1; dr++) {
+      for (let dc = -1; dc <= 1; dc++) {
+        const rr = r + dr;
+        const cc = c + dc;
+        if (inBounds(rr, cc) && grid[rr][cc] === EMPTY) {
+          grid[rr][cc] = BLOCKED;
+        }
+      }
+    }
+  }
 }
 
 function shipsRemaining(ships) {
@@ -469,7 +496,9 @@ function chooseAIShot() {
 }
 
 function isFireable(grid, r, c) {
-  return inBounds(r, c) && grid[r][c] !== MISS && grid[r][c] !== HIT;
+  if (!inBounds(r, c)) return false;
+  const v = grid[r][c];
+  return v !== MISS && v !== HIT && v !== BLOCKED;
 }
 
 function queueAdjacentTargets(r, c) {

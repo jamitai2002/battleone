@@ -20,7 +20,8 @@ plain HTML, CSS, and JavaScript (no build step, no dependencies).
    each ship (diagonals included).
 2. Click **Start Game** once all five ships are placed.
 3. **Fire** by clicking cells on the *Enemy Waters* board. Red = hit, grey =
-   miss, dark red = sunk.
+   miss, dark red = sunk, black = auto-revealed empty water around a sunk ship
+   (locked — no one can fire there).
 4. **Keep firing as long as you hit.** Your turn only ends when you miss — then
    the computer fires back under the same rule. Sink the whole enemy fleet
    before it sinks yours.
