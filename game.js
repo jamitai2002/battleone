@@ -5,6 +5,8 @@
  * ------------------------------------------------------------------ */
 
 const BOARD_SIZE = 10;
+// How long the AI "thinks" before each shot, so its turns are easy to follow.
+const AI_MOVE_DELAY_MS = 2000;
 const SHIPS = [
   { name: "Carrier", size: 5 },
   { name: "Battleship", size: 4 },
@@ -381,7 +383,7 @@ function handlePlayerShot(r, c) {
   if (result === "miss") {
     state.playerTurn = false;
     state.locked = true;
-    setTimeout(aiTurn, 650);
+    setTimeout(aiTurn, AI_MOVE_DELAY_MS);
   }
 }
 
@@ -435,7 +437,7 @@ function aiTurn() {
     state.playerTurn = true;
     state.locked = false;
   } else {
-    setTimeout(aiTurn, 650);
+    setTimeout(aiTurn, AI_MOVE_DELAY_MS);
   }
 }
 
