@@ -359,7 +359,9 @@ function blockAroundShip(grid, ship) {
       for (let dc = -1; dc <= 1; dc++) {
         const rr = r + dr;
         const cc = c + dc;
-        if (inBounds(rr, cc) && grid[rr][cc] === EMPTY) {
+        // Also recolor any earlier miss in the ring — it is the same
+        // guaranteed-empty water, so it should read as blocked, not a miss.
+        if (inBounds(rr, cc) && (grid[rr][cc] === EMPTY || grid[rr][cc] === MISS)) {
           grid[rr][cc] = BLOCKED;
         }
       }

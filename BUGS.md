@@ -166,7 +166,8 @@ be revealed in **gray** and locked so neither side wastes a guess there.
 
 **Implementation:** A new cell state `BLOCKED` was added. When `applyShot`
 resolves to `"sunk"`, `blockAroundShip` flips every in-bounds `EMPTY` cell in the
-ship's 8-neighbour ring to `BLOCKED` (existing misses are left untouched):
+ship's 8-neighbour ring to `BLOCKED` (recoloring any earlier miss in the ring,
+since it is the same guaranteed-empty water):
 
 ```js
 if (ship.hits >= ship.size) {
@@ -178,7 +179,8 @@ if (ship.hits >= ship.size) {
 `isFireable` and `applyShot` both treat `BLOCKED` like an already-resolved cell,
 so the player can't click it and the AI never targets it. Both boards render
 `BLOCKED` cells in gray. Tests verify the full ring is blocked, ship cells stay
-`HIT`, blocked cells are not fireable, and pre-existing misses are preserved.
+`HIT`, blocked cells are not fireable, an earlier miss inside the ring is
+recolored to blocked, and a miss outside the ring is left untouched.
 
 ---
 

@@ -77,14 +77,22 @@ check("ship cells themselves are HIT not BLOCKED",
   sg[5][5] === T.HIT && sg[5][6] === T.HIT);
 check("blocked cells are not fireable", !T.isFireable(sg, 4, 5));
 check("firing a blocked cell returns repeat", T.applyShot(sg, sships, 4, 5) === "repeat");
-// A pre-existing miss next to the ship is preserved (not overwritten by BLOCKED).
+// A pre-existing miss inside the ring is recolored to BLOCKED on sink.
 const mg = T.makeGrid();
 const mships = [];
 T.placeShip(mg, mships, { name: "Destroyer", size: 2 }, 5, 5, "H");
 T.applyShot(mg, mships, 4, 5); // miss adjacent to ship
 T.applyShot(mg, mships, 5, 5);
 T.applyShot(mg, mships, 5, 6); // sink
-check("existing miss adjacent to a sunk ship stays a miss", mg[4][5] === T.MISS);
+check("existing miss inside a sunk ship's ring becomes blocked", mg[4][5] === T.BLOCKED);
+// A miss outside the ring is untouched.
+const og = T.makeGrid();
+const oships = [];
+T.placeShip(og, oships, { name: "Destroyer", size: 2 }, 5, 5, "H");
+T.applyShot(og, oships, 0, 0); // miss far from ship
+T.applyShot(og, oships, 5, 5);
+T.applyShot(og, oships, 5, 6); // sink
+check("miss outside the ring stays a miss", og[0][0] === T.MISS);
 
 /* 5. Full battle sim: player auto-fires whole board, should win */
 T.state = T.createState();
