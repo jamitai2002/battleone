@@ -22,6 +22,8 @@ shot we check the result, and only when it is `"miss"` do we switch sides. On a
 unlocked; the AI schedules another shot). Regression tests assert "player keeps
 turn after a hit", "player loses turn after a miss", and the AI equivalents.
 
+![Turn logic — a hit lets the same side fire again; the turn only passes on a miss](assets/turn-logic-hit-keeps-turn.png)
+
 ---
 
 ## BUG #2: Ship Placement Proximity Validation
