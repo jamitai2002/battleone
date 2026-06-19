@@ -100,6 +100,8 @@ changed to gray per the follow-up request.) Tests confirm the full ring is
 blocked, the ship's own cells stay marked as hits, and blocked cells are not
 fireable.
 
+![Sunk ship — the surrounding ring is auto-revealed in gray and locked for both players](assets/sunk-ship-blocked-ring.png)
+
 ---
 
 ## BUG #6: Ship Placement — Cannot Modify After Placement
