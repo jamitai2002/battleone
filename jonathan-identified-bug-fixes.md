@@ -42,6 +42,8 @@ both manual placement and the "Randomize" fleet generator validate through
 alike. A test generates 200 random fleets and confirms no two ships are ever
 adjacent (including diagonally).
 
+![Ship spacing — each ship keeps at least one free square on every side, including diagonals](assets/ship-spacing-buffer.png)
+
 ---
 
 ## BUG #3: Game Speed — Opponent Plays Too Fast
