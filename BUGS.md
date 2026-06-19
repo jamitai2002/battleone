@@ -184,6 +184,32 @@ recolored to blocked, and a miss outside the ring is left untouched.
 
 ---
 
+### Enhancement — reposition a placed ship during setup
+
+**Request:** After placing a ship, there was no way to move it before pressing
+**Start Game** — you were stuck with the first placement.
+
+**Implementation:** A placed ship can now be picked back up. Clicking the ship on
+your board (when no ship is "in hand"), or clicking its entry in the tray, runs
+`pickUpShip`: it clears the ship's cells, removes it from the fleet, and re-selects
+it so the next board click drops it in the new spot.
+
+```js
+function pickUpShip(idx) {
+  const i = state.playerShips.findIndex((s) => s.name === SHIPS[idx].name);
+  if (i === -1) return;
+  for (const { r, c } of state.playerShips[i].cells) state.playerBoard[r][c] = EMPTY;
+  state.playerShips.splice(i, 1);
+  state.selectedShipIndex = idx; // back "in hand"
+  // re-render ...
+}
+```
+
+Tests cover placing, picking back up (cells cleared, fleet count drops, selection
+restored), and re-placing in a new location.
+
+---
+
 ## How to run the tests
 
 ```bash

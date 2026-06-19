@@ -98,7 +98,7 @@ this.__test = {
   makeGrid, shipCells, canPlace, placeShip, randomizeFleet,
   applyShot, blockAroundShip, shipsRemaining, findShipAt,
   startGame, handlePlayerShot, aiTurn, chooseAIShot, queueAdjacentTargets,
-  createState, isFireable,
+  createState, isFireable, handleSetupClick, pickUpShip,
 };`;
 vm.createContext(sandbox);
 vm.runInContext(code + epilogue, sandbox);

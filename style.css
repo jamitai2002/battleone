@@ -96,7 +96,8 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 }
 
 .tray-ship.selected { border-color: var(--accent); }
-.tray-ship.placed { opacity: 0.4; cursor: default; }
+.tray-ship.placed { opacity: 0.5; }
+.tray-ship.placed:hover { opacity: 0.8; }
 
 .tray-ship .pips {
   display: flex;
@@ -153,6 +154,8 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .board.enemy .cell { cursor: crosshair; }
 .board.enemy .cell.fired { cursor: default; }
+/* During setup, placed ships can be clicked to pick them back up. */
+.board:not(.enemy) .cell.ship { cursor: pointer; }
 
 .cell.ship { background: var(--ship); }
 .cell.preview { background: var(--ship-preview); }

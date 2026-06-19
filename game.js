@@ -239,12 +239,15 @@ function renderTray() {
     item.appendChild(label);
     item.appendChild(pips);
 
-    if (!placed) {
-      item.addEventListener("click", () => {
+    item.addEventListener("click", () => {
+      if (placed) {
+        // Pick an already-placed ship back up so it can be repositioned.
+        pickUpShip(idx);
+      } else {
         state.selectedShipIndex = idx;
         renderTray();
-      });
-    }
+      }
+    });
     els.shipTray.appendChild(item);
   });
 
@@ -275,9 +278,31 @@ function clearPreview() {
   });
 }
 
+// Remove a placed ship from the board and take it "in hand" for re-placement.
+function pickUpShip(idx) {
+  const def = SHIPS[idx];
+  const i = state.playerShips.findIndex((s) => s.name === def.name);
+  if (i === -1) return;
+  for (const { r, c } of state.playerShips[i].cells) {
+    state.playerBoard[r][c] = EMPTY;
+  }
+  state.playerShips.splice(i, 1);
+  state.selectedShipIndex = idx;
+  clearPreview();
+  renderOwnBoard(els.setupBoard, state.playerBoard, state.playerShips);
+  renderTray();
+  setMessage(`Repositioning your ${def.name} — click a new spot.`);
+}
+
 function handleSetupClick(r, c) {
   if (state.selectedShipIndex === null) {
-    setMessage("Select a ship from the tray first.");
+    // Empty hand: clicking an already-placed ship picks it up to move it.
+    if (state.playerBoard[r][c] === SHIP) {
+      const ship = findShipAt(state.playerShips, r, c);
+      pickUpShip(SHIPS.findIndex((d) => d.name === ship.name));
+    } else {
+      setMessage("Select a ship from the tray first.");
+    }
     return;
   }
   const def = SHIPS[state.selectedShipIndex];

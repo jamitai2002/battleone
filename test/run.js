@@ -166,6 +166,27 @@ const before = T.state.playerShips.length;
 T.placeShip(T.state.playerBoard, T.state.playerShips, def0, 0, 0, "H"); // overlap -> rejected
 check("overlapping re-place rejected (count unchanged)", T.state.playerShips.length === before);
 
+/* 8b. Repositioning a placed ship during setup */
+T.state = T.createState();
+T.state.phase = "setup";
+// Place the Carrier (index 0), then pick it up and move it elsewhere.
+T.state.selectedShipIndex = 0;
+T.handleSetupClick(0, 0); // place Carrier at row 0
+check("ship placed during setup", T.state.playerShips.some((s) => s.name === T.SHIPS[0].name));
+check("placement clears selection", T.state.selectedShipIndex === null);
+// Empty hand: clicking an occupied cell picks the ship back up.
+T.handleSetupClick(0, 0);
+check("clicking a placed ship picks it back up",
+  !T.state.playerShips.some((s) => s.name === T.SHIPS[0].name) &&
+  T.state.selectedShipIndex === 0);
+check("picked-up ship's cells are cleared from the board",
+  T.state.playerBoard[0][0] === T.EMPTY);
+// Drop it in a new location.
+T.handleSetupClick(5, 0);
+const movedShip = T.state.playerShips.find((s) => s.name === T.SHIPS[0].name);
+check("ship can be re-placed in a new spot",
+  movedShip && movedShip.cells.every((c) => c.r === 5));
+
 /* 9. Turn rules: keep firing on hit/sunk, lose turn only on a miss */
 T.state = T.createState();
 T.state.phase = "battle";
